@@ -14,7 +14,8 @@ to show exactly these cases, so I used it as the proof for each bug.
 **The report:** "Sometimes when we refresh, we see numbers that belong to
 another company."
 
-**Open:** `backend/app/services/cache.py` line 16 · `database/seed.sql` lines 8-9
+**Where:** `backend/app/services/cache.py`, line 16. The seed data is in
+`database/seed.sql`, lines 8 and 9.
 
 The cache key was only the property id:
 
@@ -49,7 +50,8 @@ The function already had `tenant_id`. It just never reached the key.
 
 **The report:** "We're showing different totals for March."
 
-**Open:** `database/seed.sql` line 8, then line 19 · `backend/app/services/reservations.py` line 34
+**Where:** `backend/app/services/reservations.py`, line 34. The property and the
+booking are in `database/seed.sql`, lines 8 and 19.
 
 The month was built without a timezone:
 
@@ -86,8 +88,9 @@ function did not have that argument.
 
 **The report:** "Totals are off by a few cents."
 
-**Open:** `database/seed.sql` lines 24-26 · `backend/app/api/v1/dashboard.py` line 25 ·
-`frontend/src/components/RevenueSummary.tsx` lines 9 and 74
+**Where:** `backend/app/api/v1/dashboard.py`, line 25, and
+`frontend/src/components/RevenueSummary.tsx`, lines 9 and 74. The three
+reservations are in `database/seed.sql`, lines 24 to 26.
 
 The total was exact in the database and exact as a `Decimal`. Then it was
 converted twice:
@@ -130,7 +133,7 @@ maths on it. The badge has nothing left to find, so it is gone.
 
 **The report:** "The numbers don't match our internal records."
 
-**Open:** `backend/app/services/reservations.py` line 128
+**Where:** `backend/app/services/reservations.py`, line 128.
 
 Every error was caught and answered with a fixed table:
 
