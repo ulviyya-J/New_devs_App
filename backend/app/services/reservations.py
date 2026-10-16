@@ -1,7 +1,10 @@
 from datetime import datetime
+import logging
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Dict, Any, List
 from zoneinfo import ZoneInfo
+
+logger = logging.getLogger(__name__)
 
 UTC = ZoneInfo("UTC")
 
@@ -114,24 +117,18 @@ async def calculate_total_revenue(property_id: str, tenant_id: str) -> Dict[str,
             raise Exception("Database pool not available")
             
     except Exception as e:
-        print(f"Database error for {property_id} (tenant: {tenant_id}): {e}")
-        
-        # Create property-specific mock data for testing when DB is unavailable
-        # This ensures each property shows different figures
-        mock_data = {
-            'prop-001': {'total': '1000.00', 'count': 3},
-            'prop-002': {'total': '4975.50', 'count': 4}, 
-            'prop-003': {'total': '6100.50', 'count': 2},
-            'prop-004': {'total': '1776.50', 'count': 4},
-            'prop-005': {'total': '3256.00', 'count': 3}
-        }
-        
-        mock_property_data = mock_data.get(property_id, {'total': '0.00', 'count': 0})
-        
-        return {
-            "property_id": property_id,
-            "tenant_id": tenant_id, 
-            "total": mock_property_data['total'],
-            "currency": "USD",
-            "count": mock_property_data['count']
-        }
+        # This used to swallow the failure and answer with hardcoded figures
+        # keyed only by property_id — the same invented total for every tenant
+        # sharing an id, presented as real revenue. A client reading its board
+        # numbers off a dashboard must never be shown a fabricated figure, and
+        # it explains totals that do not match anyone's internal records.
+        #
+        # A revenue read that cannot reach the database is a failure, and the
+        # caller is told so.
+        logger.error(
+            "Revenue query failed for property=%s tenant=%s: %s",
+            property_id,
+            tenant_id,
+            e,
+        )
+        raise
