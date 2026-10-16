@@ -1,19 +1,40 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Dict, Any, List
+from zoneinfo import ZoneInfo
 
-async def calculate_monthly_revenue(property_id: str, month: int, year: int, db_session=None) -> Decimal:
+UTC = ZoneInfo("UTC")
+
+
+async def calculate_monthly_revenue(
+    property_id: str,
+    month: int,
+    year: int,
+    tenant_id: str,
+    timezone: str = "UTC",
+    db_session=None,
+) -> Decimal:
     """
-    Calculates revenue for a specific month.
+    Calculates revenue for a specific month, in the property's own timezone.
+
+    A month belongs to the property, not to UTC. The boundaries are built in
+    the property's local zone and only then converted to UTC for the query:
+    a Paris stay checking in on 1 March at 00:30 local is 29 February 23:30
+    UTC, and a naive UTC window drops it out of March entirely.
     """
 
-    start_date = datetime(year, month, 1)
+    tz = ZoneInfo(timezone)
+
+    start_local = datetime(year, month, 1, tzinfo=tz)
     if month < 12:
-        end_date = datetime(year, month + 1, 1)
+        end_local = datetime(year, month + 1, 1, tzinfo=tz)
     else:
-        end_date = datetime(year + 1, 1, 1)
-        
-    print(f"DEBUG: Querying revenue for {property_id} from {start_date} to {end_date}")
+        end_local = datetime(year + 1, 1, 1, tzinfo=tz)
+
+    start_date = start_local.astimezone(UTC)
+    end_date = end_local.astimezone(UTC)
+
+    print(f"DEBUG: Querying revenue for {property_id} from {start_date} to {end_date} ({timezone})")
 
     # SQL Simulation (This would be executed against the actual DB)
     query = """
