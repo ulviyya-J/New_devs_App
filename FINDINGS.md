@@ -1,5 +1,7 @@
 # Findings
 
+Walkthrough video: https://www.loom.com/share/7dad7a3398344d839011b631c594077a
+
 I found four bugs. One for each thing the clients reported. Each one is a
 separate commit.
 
