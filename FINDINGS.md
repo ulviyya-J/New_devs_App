@@ -50,8 +50,9 @@ The function already had `tenant_id`. It just never reached the key.
 
 **The report:** "We're showing different totals for March."
 
-**Where:** `backend/app/services/reservations.py`, line 34. The property and the
-booking are in `database/seed.sql`, lines 8 and 19.
+**Where:** `calculate_monthly_revenue` in `backend/app/services/reservations.py`,
+line 17, with the fix a few lines below it. The property and the booking are in
+`database/seed.sql`, lines 8 and 19.
 
 The month was built without a timezone:
 
