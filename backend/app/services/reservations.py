@@ -1,9 +1,14 @@
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Dict, Any, List
 from zoneinfo import ZoneInfo
 
 UTC = ZoneInfo("UTC")
+
+# Amounts are stored with three decimals, so a sum can carry a fraction of a
+# cent. It is rounded once, at the end, on the exact Decimal total — never per
+# row and never through a float.
+CENTS = Decimal("0.01")
 
 
 async def calculate_monthly_revenue(
@@ -86,7 +91,9 @@ async def calculate_total_revenue(property_id: str, tenant_id: str) -> Dict[str,
                 row = result.fetchone()
                 
                 if row:
-                    total_revenue = Decimal(str(row.total_revenue))
+                    total_revenue = Decimal(str(row.total_revenue)).quantize(
+                        CENTS, rounding=ROUND_HALF_UP
+                    )
                     return {
                         "property_id": property_id,
                         "tenant_id": tenant_id,
